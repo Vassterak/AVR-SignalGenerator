@@ -13,9 +13,8 @@ This program is developed on Arduino Mega2560 and later is imported onto ATmega 
 
 For my testing purposes I do not have DAC converting IC, so I'm using only resistor ladder to create an analog signal on output.
 
-##Communication commands
+## Communication commands
 yet to be released...
 
-##Licence
+## Licence
 MIT so do with it what ever you want
-
