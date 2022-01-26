@@ -17,4 +17,7 @@ For my testing purposes I do not have DAC converting IC, so I'm using only resis
 yet to be released...
 
 ## Licence
-MIT so do with it what ever you want
+All code is MIT so do with it what ever you want...
+**EXCEPT**  
+Not sure about my teacher's own serial communication library [header code](/include/usart.h) / [src code](/src/usart.c)
+Feel free to contact him, he's usually a nice guy :D his email: kolousek@spscv.cz
