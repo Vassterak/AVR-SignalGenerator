@@ -2,15 +2,19 @@
 Arduino library not used because it cannot be used in my homework,
 also arduino's uint8_t is 16bit but AVR's is 8 bit.
 */ 
-#include <Arduino.h> //only used for Serial communication
- #include <avr/io.h>
+#include <Arduino.h> //only used for Serial communication on arduino boards
+#include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
-extern "C" { 
-#include "usart.h"
+
+extern "C"
+{      //this one is used with atmega 128 serial line, the board that is used in my school doesn't have 
+  #include "usart.h"
 }
 
+const uint8_t MAX_MESSAGE_SIZE = 14;
 uint8_t channel1Signal[256], channel2Signal[256];
+int incomingByte = 0; // for incoming serial data
 
 void createSquare(uint8_t channelID)
 {
@@ -29,7 +33,7 @@ void createSquare(uint8_t channelID)
   }
 }
 
-void createSinWave(uint8_t channelID)
+void createSinus(uint8_t channelID)
 {
   for (int16_t i = 0; i <= 0xff; i++)
   {
@@ -86,9 +90,9 @@ void OutputUpdate(uint8_t channel1, uint8_t channel2)
 void setup()
 {
   Serial.begin(9600);
-  //usart_setup();
+  //usart_setup(); for atmega 128
 
-  createSawtooth(1);
+  createSinus(1);
 
   DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
   DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
@@ -96,19 +100,37 @@ void setup()
 
 int main(void)
 {
+  init();
   setup();
-  uint8_t a = 0;
-  while (1)
+  uint8_t i = 0;
+
+while (1)
   {
-    PORTA = channel1Signal[a];
-    a++;
-    _delay_ms(5);
-    //demo_chargen();
-    //channel1 = channel1 << 1;
-    //channel1++;
-    //OutputUpdate(channel1);
-    //PORTA++;
+    if (Serial.available())
+    {
+      static char message[14];
+      static uint8_t message_pos = 0;
+
+      char newChar = Serial.read();
+
+      if ( newChar != '\n' && (message_pos < 14 - 1) )
+      {
+        message[message_pos] = newChar;
+        message_pos++;
+        Serial.println(newChar);
+      }
+
+      else
+      {
+        message[message_pos] = '\0';
+        Serial.println(message);
+        message_pos = 0;
+      }
+    }
+
+    OutputUpdate(channel1Signal[i]);
+    i++;
   }
+
   return 0;
 }
-
