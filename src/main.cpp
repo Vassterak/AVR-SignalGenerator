@@ -13,8 +13,9 @@ extern "C"
 }
 
 const uint8_t MAX_MESSAGE_SIZE = 14;
+
 uint8_t channel1Signal[256], channel2Signal[256];
-int incomingByte = 0; // for incoming serial data
+uint8_t selectedChannel, selectedAmplitude, selectedFrequency;
 
 void createSquare(uint8_t channelID)
 {
@@ -76,11 +77,6 @@ void createSawtooth(uint8_t channelID)
     }
 }
 
-void OutputUpdate(uint8_t channel1)
-{
-  PORTA = channel1;
-}
-
 void OutputUpdate(uint8_t channel1, uint8_t channel2)
 {
   PORTA = channel1;
@@ -92,43 +88,69 @@ void setup()
   Serial.begin(9600);
   //usart_setup(); for atmega 128
 
-  createSinus(1);
-
   DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
   DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
 }
 
 int main(void)
 {
-  init();
+  init(); //Initialisation for serial line from arduino.h
   setup();
-  uint8_t i = 0;
+  uint8_t i = 0; //loop trought arrays
 
-while (1)
+  while (1)
   {
-    if (Serial.available())
+    if (Serial.available()) //when there are data waiting in a buffer
     {
-      static char message[14];
+      static char message[MAX_MESSAGE_SIZE];
       static uint8_t message_pos = 0;
+      char newChar = Serial.read(); //read first char in buffer, if read delete it in buffer
 
-      char newChar = Serial.read();
-
-      if ( newChar != '\n' && (message_pos < 14 - 1) )
+      if ( newChar != '\n' && (message_pos < MAX_MESSAGE_SIZE - 1)) 
       {
         message[message_pos] = newChar;
         message_pos++;
-        Serial.println(newChar);
       }
 
-      else
+      else //whole message block has been received
       {
         message[message_pos] = '\0';
-        Serial.println(message);
+        Serial.println(message); //for debug only
         message_pos = 0;
+
+        if (isdigit(message[0]))
+        {
+          selectedChannel = (int)message[0] - (int)'0'; //convert char number to int, char to int return ASCII value, so we need to substract 0 in ASCII
+          Serial.println("selected channel: "); //debug only
+          Serial.println(selectedChannel); //debug only
+        }
+        
+        switch (message[1])
+        {
+        case 's':
+          createSinus(selectedChannel);
+          break;
+
+        case 't':
+          createTriangle(selectedChannel);
+          break;
+
+        case 'w':
+          createSawtooth(selectedChannel);
+          break;
+
+        case 'e':
+          createSquare(selectedChannel);
+          break;
+
+        default:
+          Serial.println("Wrong value");
+          break;
+        }
       }
     }
 
-    OutputUpdate(channel1Signal[i]);
+    OutputUpdate(channel1Signal[i], channel2Signal[i]);
     i++;
   }
 
