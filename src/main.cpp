@@ -17,16 +17,16 @@ const uint8_t MAX_MESSAGE_SIZE = 14;
 uint8_t channel1Signal[256], channel2Signal[256];
 uint8_t selectedChannel, selectedAmplitude, selectedFrequency;
 
-void createSquare(uint8_t channelID)
+void createSquare(uint8_t channelID, uint8_t amplitude)
 {
   for (int16_t i = 0; i <= 0xff; i++)
   {
     if (channelID == 1)
     {
-      if (i <= 0x7f)
+      if (i <= 0xff / 2)
         channel1Signal[i] = 0;
       else
-        channel1Signal[i] = 0xff;
+        channel1Signal[i] = amplitude;
     }
 
     else
@@ -34,29 +34,29 @@ void createSquare(uint8_t channelID)
   }
 }
 
-void createSinus(uint8_t channelID)
+void createSinus(uint8_t channelID, uint8_t amplitude)
 {
   for (int16_t i = 0; i <= 0xff; i++)
   {
     if (channelID == 1)
-        channel1Signal[i] = 0x7f + (0x7f * sin(2* M_PI / 0xff * (i+1)));
+        channel1Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / 0xff * (i+1)));
 
     else
-        channel2Signal[i] = 0x7f + (0x7f * sin(2* M_PI / 0xff * (i+1)));
+        channel2Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / 0xff * (i+1)));
   }
 }
 
-void createTriangle(uint8_t channelID)
+void createTriangle(uint8_t channelID, uint8_t amplitude)
 {
   for (int16_t i = 0; i <= 0xff; i++)
   {
     if (channelID == 1)
     {
-      if (i <= 0x7f)
-        channel1Signal[i] = i*2;
+      if (i <= 0xff/2)
+        channel1Signal[i] = (int)((amplitude / 127.0f) * i);
       
       else
-        channel1Signal[i] = (0xff - i) *2;
+        channel1Signal[i] = (0xff - i) * (amplitude / 127.0f);
     }
 
     else
@@ -65,12 +65,12 @@ void createTriangle(uint8_t channelID)
   
 }
 
-void createSawtooth(uint8_t channelID)
+void createSawtooth(uint8_t channelID, uint8_t amplitude)
 {
     for (int16_t i = 0; i <= 0xff; i++)
     {
       if (channelID == 1)
-        channel1Signal[i] = i;
+        channel1Signal[i] = (int)((amplitude / 255.0f) * i);
 
       else
         channel2Signal[i] = i;
@@ -124,29 +124,35 @@ int main(void)
           Serial.println("selected channel: "); //debug only
           Serial.println(selectedChannel); //debug only
         }
+
+        char amplitude[3];
+        memcpy(amplitude, &message[2],3);
+        selectedAmplitude = atoi(amplitude);
         
         switch (message[1])
         {
         case 's':
-          createSinus(selectedChannel);
+          createSinus(selectedChannel, selectedAmplitude);
           break;
 
         case 't':
-          createTriangle(selectedChannel);
+          createTriangle(selectedChannel, selectedAmplitude);
           break;
 
         case 'w':
-          createSawtooth(selectedChannel);
+          createSawtooth(selectedChannel, selectedAmplitude);
           break;
 
         case 'e':
-          createSquare(selectedChannel);
+          createSquare(selectedChannel, selectedAmplitude);
           break;
 
         default:
           Serial.println("Wrong value");
           break;
         }
+
+
       }
     }
 
