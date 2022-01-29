@@ -10,15 +10,23 @@ extern "C" {
 #include "usart.h"
 }
 
-uint8_t channel1Singal[256], channel2Signal[256];
+uint8_t channel1Signal[256], channel2Signal[256];
 
-void setup()
+void createSquare(uint8_t channelID)
 {
-  Serial.begin(9600);
-  //usart_setup();
+  for (int16_t i = 0; i <= 0xff; i++)
+  {
+    if (channelID == 1)
+    {
+      if (i <= 0x7f)
+        channel1Signal[i] = 0;
+      else
+        channel1Signal[i] = 0xff;
+    }
 
-  DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
-  DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
+    else
+      channel2Signal[i] = i;
+  }
 }
 
 void createSinWave(uint8_t channelID)
@@ -26,11 +34,42 @@ void createSinWave(uint8_t channelID)
   for (int16_t i = 0; i <= 0xff; i++)
   {
     if (channelID == 1)
-        channel1Singal[i] = 0x7f + (0x7f * sin(2* M_PI / 0xff * (i+1)));
+        channel1Signal[i] = 0x7f + (0x7f * sin(2* M_PI / 0xff * (i+1)));
 
     else
         channel2Signal[i] = 0x7f + (0x7f * sin(2* M_PI / 0xff * (i+1)));
   }
+}
+
+void createTriangle(uint8_t channelID)
+{
+  for (int16_t i = 0; i <= 0xff; i++)
+  {
+    if (channelID == 1)
+    {
+      if (i <= 0x7f)
+        channel1Signal[i] = i*2;
+      
+      else
+        channel1Signal[i] = (0xff - i) *2;
+    }
+
+    else
+      channel2Signal[i] = i;
+  }
+  
+}
+
+void createSawtooth(uint8_t channelID)
+{
+    for (int16_t i = 0; i <= 0xff; i++)
+    {
+      if (channelID == 1)
+        channel1Signal[i] = i;
+
+      else
+        channel2Signal[i] = i;
+    }
 }
 
 void OutputUpdate(uint8_t channel1)
@@ -44,15 +83,16 @@ void OutputUpdate(uint8_t channel1, uint8_t channel2)
   PORTC = channel2;
 }
 
-/* void demo_chargen(void) {
-  static uint8_t c=32;
-  for (c=32;c<128;c++) {
-    usart_putchar(c);
-  }
-  usart_putchar(10);
-  usart_putchar(13);
-} */
+void setup()
+{
+  Serial.begin(9600);
+  //usart_setup();
 
+  createSawtooth(1);
+
+  DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
+  DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
+}
 
 int main(void)
 {
@@ -60,7 +100,7 @@ int main(void)
   uint8_t a = 0;
   while (1)
   {
-    PORTA = channel1Singal[a];
+    PORTA = channel1Signal[a];
     a++;
     _delay_ms(5);
     //demo_chargen();
