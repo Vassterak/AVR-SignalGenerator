@@ -7,14 +7,16 @@ also arduino's uint8_t is 16bit but AVR's is 8 bit.
 #include <stdio.h>
 #include <util/delay.h>
 
-extern "C"
-{      //this one is used with atmega 128 serial line, the board that is used in my school doesn't have 
+extern "C" //this one is used with atmega 128 serial line, the board that is used in my school doesn't have 
+{      
   #include "usart.h"
 }
 
 const uint8_t MAX_MESSAGE_SIZE = 14;
 
 static uint8_t channel1Signal[256], channel2Signal[256];
+static uint8_t channel1SampleRate, channel2SampleRate;
+
 uint8_t selectedChannel, selectedAmplitude, selectedSampleRate;
 
 void createSquare(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
@@ -29,8 +31,13 @@ void createSquare(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
         channel1Signal[i] = amplitude;
     }
 
-    else
-      channel2Signal[i] = i;
+    else //for channel 2
+    {
+      if (i <= sampleRate / 2)
+        channel2Signal[i] = 0;
+      else
+        channel2Signal[i] = amplitude;
+    }
   }
 }
 
@@ -59,8 +66,14 @@ void createTriangle(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
         channel1Signal[i] = (sampleRate - i) * (amplitude / (sampleRate / 2.0f));
     }
 
-    else
-      channel2Signal[i] = i;
+    else //for channel 2
+    {
+      if (i <= sampleRate/2)
+        channel2Signal[i] = (int)((amplitude / (sampleRate / 2.0f)) * i);
+      
+      else
+        channel2Signal[i] = (sampleRate - i) * (amplitude / (sampleRate / 2.0f));
+    }
   } 
 }
 
@@ -71,8 +84,8 @@ void createSawtooth(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
       if (channelID == 1)
         channel1Signal[i] = (int)((amplitude / sampleRate) * i);
 
-      else
-        channel2Signal[i] = i;
+      else //for channel 2
+        channel2Signal[i] = (int)((amplitude / sampleRate) * i);
     }
 }
 
@@ -135,6 +148,12 @@ void inputManagement()
       Serial.println("Wrong value");
       break;
     }
+
+    if (selectedChannel == 1)
+      channel1SampleRate = selectedSampleRate;
+
+    else
+      channel2SampleRate = selectedSampleRate;
   }
 }
 
@@ -151,21 +170,24 @@ int main(void)
 {
   init(); //Initialisation for serial line from arduino.h
   setup();
-  uint8_t i = 0; //loop trought arrays
+  uint8_t i,j = 0; //loop trought arrays
 
   while (1)
   {
     if (Serial.available()) //when there are data waiting in a buffer
-    {
       inputManagement();
-    }
-
-    OutputUpdate(channel1Signal[i], channel2Signal[i]);
-    if (i < selectedSampleRate)
+    
+    if (i < channel1SampleRate)
       i++;
-
     else
-      i=0;
+      i = 0;
+
+    if (j < channel2SampleRate)
+      j++;
+    else
+      j = 0;
+
+    OutputUpdate(channel1Signal[i], channel2Signal[j]);
   }
 
   return 0;
