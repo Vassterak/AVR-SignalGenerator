@@ -14,7 +14,7 @@ This program is developed on Arduino Mega2560 and later is imported onto ATmega 
 For my testing purposes I do not have DAC converting IC, so I'm using only resistor ladder to create an analog signal on output.
 
 ## Communication commands
-Dirty simple protocol: (channel number 1-2)(max amplitude 0-255)(max sample rate 2-255)  
+Dirty simple protocol: (channel number 1-2)(space char)(amplitude 0-255)(space char)(sample rate 2-255)(space char)(frequency delay 0-255)  
 **What each letter stands for?**  
 s - sine wave  
 t - triangle wave  
@@ -23,14 +23,16 @@ e - square wave
 
 Command examples (baud rate: 9600, command termination is with: \n):
 ```
-1s255255
+1s255 255 000
 ```
--> sine wave on channel 1 with max amplitude and sample rate  
+-> 1. exmaple: sine wave on channel 1 with max amplitude and max sample rate and zero frequency delay
 ```
-1e255002 
+1e255 002 000
 ```
--> square wave on channel 1 with max amplitude and min sample rate
- 
+-> 2. example: square wave on channel 1 with max amplitude and min sample rate and zero frequency delay
+## Waveform examples
+![1. exmaple](docs/media/maxSampleFreqSinus.png)
+![1. exmaple](docs/media/minSampleFreqSquare.png)
 ## Licence
 All code is MIT so do with it what ever you want...
 **EXCEPT**  
