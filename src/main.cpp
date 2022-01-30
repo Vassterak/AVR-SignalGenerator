@@ -14,7 +14,7 @@ extern "C"
 
 const uint8_t MAX_MESSAGE_SIZE = 14;
 
-uint8_t channel1Signal[256], channel2Signal[256];
+static uint8_t channel1Signal[256], channel2Signal[256];
 uint8_t selectedChannel, selectedAmplitude, selectedFrequency;
 
 void createSquare(uint8_t channelID, uint8_t amplitude)
@@ -83,6 +83,60 @@ void OutputUpdate(uint8_t channel1, uint8_t channel2)
   PORTC = channel2;
 }
 
+void inputManagement()
+{
+  static char message[MAX_MESSAGE_SIZE];
+  static uint8_t message_pos = 0;
+  char newChar = Serial.read(); //read first char in buffer, if read delete it in buffer
+
+  if ( newChar != '\n' && (message_pos < MAX_MESSAGE_SIZE - 1)) 
+  {
+    message[message_pos] = newChar;
+    message_pos++;
+  }
+
+  else //whole message block has been received
+  {
+    message[message_pos] = '\0';
+    Serial.println(message); //for debug only
+    message_pos = 0;
+
+    if (isdigit(message[0]))
+    {
+      selectedChannel = (int)message[0] - (int)'0'; //convert char number to int, char to int return ASCII value, so we need to substract 0 in ASCII
+      Serial.println("selected channel: "); //debug only
+      Serial.println(selectedChannel); //debug only
+    }
+
+    char amplitude[3];
+    memcpy(amplitude, &message[2],3); //extract amplitude values from incomming data
+    selectedAmplitude = atoi(amplitude);
+    
+    switch (message[1])
+    {
+    case 's':
+      createSinus(selectedChannel, selectedAmplitude);
+      break;
+
+    case 't':
+      createTriangle(selectedChannel, selectedAmplitude);
+      break;
+
+    case 'w':
+      createSawtooth(selectedChannel, selectedAmplitude);
+      break;
+
+    case 'e':
+      createSquare(selectedChannel, selectedAmplitude);
+      break;
+
+    default:
+      Serial.println("Wrong value");
+      break;
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -102,58 +156,7 @@ int main(void)
   {
     if (Serial.available()) //when there are data waiting in a buffer
     {
-      static char message[MAX_MESSAGE_SIZE];
-      static uint8_t message_pos = 0;
-      char newChar = Serial.read(); //read first char in buffer, if read delete it in buffer
-
-      if ( newChar != '\n' && (message_pos < MAX_MESSAGE_SIZE - 1)) 
-      {
-        message[message_pos] = newChar;
-        message_pos++;
-      }
-
-      else //whole message block has been received
-      {
-        message[message_pos] = '\0';
-        Serial.println(message); //for debug only
-        message_pos = 0;
-
-        if (isdigit(message[0]))
-        {
-          selectedChannel = (int)message[0] - (int)'0'; //convert char number to int, char to int return ASCII value, so we need to substract 0 in ASCII
-          Serial.println("selected channel: "); //debug only
-          Serial.println(selectedChannel); //debug only
-        }
-
-        char amplitude[3];
-        memcpy(amplitude, &message[2],3);
-        selectedAmplitude = atoi(amplitude);
-        
-        switch (message[1])
-        {
-        case 's':
-          createSinus(selectedChannel, selectedAmplitude);
-          break;
-
-        case 't':
-          createTriangle(selectedChannel, selectedAmplitude);
-          break;
-
-        case 'w':
-          createSawtooth(selectedChannel, selectedAmplitude);
-          break;
-
-        case 'e':
-          createSquare(selectedChannel, selectedAmplitude);
-          break;
-
-        default:
-          Serial.println("Wrong value");
-          break;
-        }
-
-
-      }
+      inputManagement();
     }
 
     OutputUpdate(channel1Signal[i], channel2Signal[i]);
