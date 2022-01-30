@@ -123,8 +123,8 @@ void inputManagement()
     char amplitude[] = "255", sampleRate[] = "255", delayLocal[] = "255";
 
     memcpy(amplitude, &message[2],3); //extract amplitude values from incomming data
-    memcpy(sampleRate, &message[5],3); //extract sample rate values from incomming data
-    memcpy(delayLocal, &message[8],3); //extract sample rate values from incomming data
+    memcpy(sampleRate, &message[6],3); //extract sample rate values from incomming data
+    memcpy(delayLocal, &message[10],3); //extract sample rate values from incomming data
 
     selectedAmplitude = atoi(amplitude); //save data to int variable
     selectedSampleRate = atoi(sampleRate); //save data to int variable
