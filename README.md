@@ -14,10 +14,25 @@ This program is developed on Arduino Mega2560 and later is imported onto ATmega 
 For my testing purposes I do not have DAC converting IC, so I'm using only resistor ladder to create an analog signal on output.
 
 ## Communication commands
-yet to be released...
+Dirty simple protocol: (channel number 1-2)(max amplitude 0-255)(max sample rate 2-255)  
+**What each letter stands for?**  
+s - sine wave  
+t - triangle wave  
+w - sawtooth wave  
+e - square wave  
 
+Command examples (baud rate: 9600, command termination is with: \n):
+```
+1s255255
+```
+-> sine wave on channel 1 with max amplitude and sample rate  
+```
+1e255002 
+```
+-> square wave on channel 1 with max amplitude and min sample rate
+ 
 ## Licence
 All code is MIT so do with it what ever you want...
 **EXCEPT**  
-Not sure about my teacher's own serial communication library [header code](/include/usart.h) / [src code](/src/usart.c)
+Not sure about my teacher's own serial communication library for ATmega 128 over RS232 [header code](/include/usart.h) / [src code](/src/usart.c)
 Feel free to contact him, he's usually a nice guy :D his email: kolousek@spscv.cz
