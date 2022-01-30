@@ -15,15 +15,15 @@ extern "C"
 const uint8_t MAX_MESSAGE_SIZE = 14;
 
 static uint8_t channel1Signal[256], channel2Signal[256];
-uint8_t selectedChannel, selectedAmplitude, selectedFrequency;
+uint8_t selectedChannel, selectedAmplitude, selectedSampleRate;
 
-void createSquare(uint8_t channelID, uint8_t amplitude)
+void createSquare(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
-  for (int16_t i = 0; i <= 0xff; i++)
+  for (int16_t i = 0; i <= sampleRate; i++)
   {
     if (channelID == 1)
     {
-      if (i <= 0xff / 2)
+      if (i <= sampleRate / 2)
         channel1Signal[i] = 0;
       else
         channel1Signal[i] = amplitude;
@@ -34,43 +34,42 @@ void createSquare(uint8_t channelID, uint8_t amplitude)
   }
 }
 
-void createSinus(uint8_t channelID, uint8_t amplitude)
+void createSinus(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
-  for (int16_t i = 0; i <= 0xff; i++)
+  for (int16_t i = 0; i <= sampleRate; i++)
   {
     if (channelID == 1)
-        channel1Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / 0xff * (i+1)));
+        channel1Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / sampleRate * (i+1)));
 
     else
-        channel2Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / 0xff * (i+1)));
+        channel2Signal[i] = amplitude/2 + (amplitude/2 * sin(2* M_PI / sampleRate * (i+1)));
   }
 }
 
-void createTriangle(uint8_t channelID, uint8_t amplitude)
+void createTriangle(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
-  for (int16_t i = 0; i <= 0xff; i++)
+  for (int16_t i = 0; i <= sampleRate; i++)
   {
     if (channelID == 1)
     {
-      if (i <= 0xff/2)
-        channel1Signal[i] = (int)((amplitude / 127.0f) * i);
+      if (i <= sampleRate/2)
+        channel1Signal[i] = (int)((amplitude / (sampleRate / 2.0f)) * i);
       
       else
-        channel1Signal[i] = (0xff - i) * (amplitude / 127.0f);
+        channel1Signal[i] = (sampleRate - i) * (amplitude / (sampleRate / 2.0f));
     }
 
     else
       channel2Signal[i] = i;
-  }
-  
+  } 
 }
 
-void createSawtooth(uint8_t channelID, uint8_t amplitude)
+void createSawtooth(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
-    for (int16_t i = 0; i <= 0xff; i++)
+    for (int16_t i = 0; i <= sampleRate; i++)
     {
       if (channelID == 1)
-        channel1Signal[i] = (int)((amplitude / 255.0f) * i);
+        channel1Signal[i] = (int)((amplitude / sampleRate) * i);
 
       else
         channel2Signal[i] = i;
@@ -108,26 +107,28 @@ void inputManagement()
       Serial.println(selectedChannel); //debug only
     }
 
-    char amplitude[3];
+    char amplitude[3], sampleRate[3];
     memcpy(amplitude, &message[2],3); //extract amplitude values from incomming data
-    selectedAmplitude = atoi(amplitude);
+    memcpy(sampleRate, &message[5],3); //extract sample rate values from incomming data
+    selectedAmplitude = atoi(amplitude); //save data to int variable
+    selectedSampleRate = atoi(sampleRate); //save data to int variable
     
     switch (message[1])
     {
     case 's':
-      createSinus(selectedChannel, selectedAmplitude);
+      createSinus(selectedChannel, selectedAmplitude, selectedSampleRate);
       break;
 
     case 't':
-      createTriangle(selectedChannel, selectedAmplitude);
+      createTriangle(selectedChannel, selectedAmplitude, selectedSampleRate);
       break;
 
     case 'w':
-      createSawtooth(selectedChannel, selectedAmplitude);
+      createSawtooth(selectedChannel, selectedAmplitude, selectedSampleRate);
       break;
 
     case 'e':
-      createSquare(selectedChannel, selectedAmplitude);
+      createSquare(selectedChannel, selectedAmplitude, selectedSampleRate);
       break;
 
     default:
@@ -160,7 +161,11 @@ int main(void)
     }
 
     OutputUpdate(channel1Signal[i], channel2Signal[i]);
-    i++;
+    if (i < selectedSampleRate)
+      i++;
+
+    else
+      i=0;
   }
 
   return 0;
