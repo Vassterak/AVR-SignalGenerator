@@ -17,7 +17,7 @@ const uint8_t MAX_MESSAGE_SIZE = 14;
 static uint8_t channel1Signal[256], channel2Signal[256];
 static uint8_t channel1SampleRate, channel2SampleRate;
 
-uint8_t selectedChannel, selectedAmplitude, selectedSampleRate;
+uint8_t selectedChannel, selectedAmplitude, selectedSampleRate, selectedDelay = 0;
 
 void createSquare(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
@@ -116,16 +116,30 @@ void inputManagement()
     if (isdigit(message[0]))
     {
       selectedChannel = (int)message[0] - (int)'0'; //convert char number to int, char to int return ASCII value, so we need to substract 0 in ASCII
-      Serial.println("selected channel: "); //debug only
+      Serial.print("selected channel: "); //debug only
       Serial.println(selectedChannel); //debug only
     }
 
-    char amplitude[3], sampleRate[3];
+    char amplitude[] = "255", sampleRate[] = "255", delayLocal[] = "255";
+
     memcpy(amplitude, &message[2],3); //extract amplitude values from incomming data
     memcpy(sampleRate, &message[5],3); //extract sample rate values from incomming data
+    memcpy(delayLocal, &message[8],3); //extract sample rate values from incomming data
+
     selectedAmplitude = atoi(amplitude); //save data to int variable
     selectedSampleRate = atoi(sampleRate); //save data to int variable
-    
+    selectedDelay = atoi(delayLocal); //save data to int variable
+
+    Serial.print("Amplitude: ");
+    Serial.println(selectedAmplitude);
+
+    Serial.print("Sample rate: ");
+    Serial.println(selectedSampleRate);
+
+    Serial.print("Delay: ");
+    Serial.println(selectedDelay);
+
+
     switch (message[1])
     {
     case 's':
@@ -164,6 +178,7 @@ void setup()
 
   DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
   DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
+  DDRL = 0xff;
 }
 
 int main(void)
@@ -176,7 +191,13 @@ int main(void)
   {
     if (Serial.available()) //when there are data waiting in a buffer
       inputManagement();
-    
+
+    if (selectedDelay > 0) //custom delay affects both channels
+    {
+      for (int o = 0; o < 2 * selectedDelay; o++)
+        PORTL = (uint8_t)o;
+    }
+
     if (i < channel1SampleRate)
       i++;
     else
@@ -189,6 +210,5 @@ int main(void)
 
     OutputUpdate(channel1Signal[i], channel2Signal[j]);
   }
-
   return 0;
 }
