@@ -6,7 +6,7 @@ This program is developed on Arduino Mega2560 and later is imported onto ATmega 
 
 ## What does it do?
 1. It's meant to be a 2 Channel signal generator.
-2. To change waveforms you will need to communicate via serial line (RS232)
+2. To change waveforms you will need to communicate via serial line. (Arduino = USB, ATmega128 RS232)
 3. You will be able to change frequency and waveform type and max amplitude
 4. It's unable to output AC signal because it's missing OP-Amp so max pK-pK voltage is 5V (0V-5V)
 5. It's only using 8bit DAC so it's not super high res. but good enough.
