@@ -1,6 +1,6 @@
 /*
 Arduino library not used because it cannot be used in my homework,
-also arduino's uint8_t is 16bit but AVR's is 8 bit.
+also arduino's default int is 16bit but <avr/io.h> is 8 bit.
 */ 
 #include <Arduino.h> //only used for Serial communication on arduino boards
 #include <avr/io.h>
