@@ -178,7 +178,7 @@ void setup()
 
   DDRA = 0xff; //set whole Port A as output CHANNEL 1 8bits
   DDRC = 0xff; //set whole Port C as output CHANNEL 2 8bits
-  DDRL = 0xff;
+  DDRL = 0xff; //dummy port to confuse compiler and add my delay to final compiled project because _delay_us takes to much time. and I don't want to be that slow
 }
 
 int main(void)
