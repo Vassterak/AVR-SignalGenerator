@@ -180,12 +180,12 @@ int main(void)
     if (i < channel1SampleRate)
       i++;
     else
-      i = 0;
+      i = 1;
 
     if (j < channel2SampleRate)
       j++;
     else
-      j = 0;
+      j = 1;
 
     OutputUpdate(channel1Signal[i], channel2Signal[j]);
   }
