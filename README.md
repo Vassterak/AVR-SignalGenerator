@@ -14,7 +14,7 @@ This program is developed on Arduino Mega2560 and later is imported onto ATmega 
 For my testing purposes I do not have DAC converting IC, so I'm using only resistor ladder to create an analog signal on output.
 
 ## Communication commands
-Dirty simple protocol: (channel number 1-2)(space char)(amplitude 0-255)(space char)(sample rate 2-255)(space char)(frequency delay 0-255)  
+Dirty simple protocol: (channel number 1-2)(wave type char)(amplitude 0-255)(space char)(sample rate 2-255)(space char)(frequency delay 0-255)  
 **What each letter stands for?**  
 s - sine wave  
 t - triangle wave  
