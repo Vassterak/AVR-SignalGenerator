@@ -89,7 +89,7 @@ void createRamp(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
     }
 }
 
-void OutputUpdate(uint8_t channel1, uint8_t channel2)
+void outputUpdate(uint8_t channel1, uint8_t channel2)
 {
   PORTA = channel1;
   PORTC = channel2;
@@ -208,7 +208,7 @@ int main(void)
     else
       j = 1;
 
-    OutputUpdate(channel1Signal[i], channel2Signal[j]);
+    outputUpdate(channel1Signal[i], channel2Signal[j]);
   }
   return 0;
 }
