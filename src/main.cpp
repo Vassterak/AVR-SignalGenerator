@@ -7,10 +7,10 @@ also arduino's default int is 16bit but <avr/io.h> is 8 bit.
 #include <stdio.h>
 #include <util/delay.h>
 
-extern "C" //this one is used with atmega 128 serial line, the board that is used in my school doesn't have 
+/*extern "C" //this one is used with atmega 128 serial line, the board that is used in my school doesn't have 
 {      
   #include "usart.h"
-}
+}*/
 
 const uint8_t MAX_MESSAGE_SIZE = 14;
 
@@ -77,7 +77,7 @@ void createTriangle(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
   } 
 }
 
-void createSawtooth(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
+void createRamp(uint8_t channelID, uint8_t amplitude, uint8_t sampleRate)
 {
     for (int16_t i = 0; i <= sampleRate; i++)
     {
@@ -151,7 +151,7 @@ void inputManagement()
       break;
 
     case 'w':
-      createSawtooth(selectedChannel, selectedAmplitude, selectedSampleRate);
+      createRamp(selectedChannel, selectedAmplitude, selectedSampleRate);
       break;
 
     case 'e':
