@@ -2,7 +2,7 @@
 Arduino library not used because it cannot be used in my homework,
 also arduino's default int is 16bit but <avr/io.h> is 8 bit.
 */ 
-#include <Arduino.h> //only used for Serial communication on arduino boards
+#include <Arduino.h> //only used for Serial communication on arduino boards | PS: <math.h> is included in <Arduino.h>
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
