@@ -38,3 +38,4 @@ All code is MIT so do with it what ever you want...
 **EXCEPT**  
 Not sure about my teacher's own serial communication library for ATmega 128 over RS232 [header code](/include/usart.h) / [src code](/src/usart.c)
 Feel free to contact him, he's usually a nice guy :D his email: kolousek@spscv.cz
+### All this was valid back in 2022 how it is now I just don't know. I'm archiving/deleting all my old projects.
